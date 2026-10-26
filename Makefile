@@ -8,6 +8,8 @@ test-backend:
 	docker compose -f tests/docker-compose.test.yaml -p tapas-test down -v
 
 test-frontend:
+	npm ci --prefix frontend
+	npm ci --include=dev --prefix tests/frontend
 	cd tests/frontend && npm test
 
 load:
