@@ -2,11 +2,11 @@
 
 ## Repository structure
 
-This repo has a `main` branch and 6 exercise branches (`exercise/01` through `exercise/06`). Each exercise branch is stacked on top of the previous one (i.e., `exercise/02` is based on `exercise/01`, etc.).
+This repo has a `main` branch and 6 exercise branches, each a solution snapshot of one exercise: `01-setup-infra-metrics`, `02-setup-obi`, `03-instrumenting-applications`, `04-customizing-instrumentations`, `05-processing` and `06-manual-instrumentation`. Each exercise branch is stacked on top of the previous one (i.e., `02-setup-obi` is based on `01-setup-infra-metrics`, etc.).
 
-When making changes to an earlier exercise branch, rebase all subsequent exercise branches on top of it to keep the stack consistent.
+The exercise branches carry the history of the original `grafana-cold-storage/grafanacon2026-opentelemetry-instrumentation` repository plus a commit that points links at this repo. Don't squash or force-push them without asking the user first.
 
-Each exercise branch should have exactly one commit (squash all commits before rebasing downstream branches).
+Links in the docs must point to this repo (`immavalls/opentelemetry-instrumentation-workshop`) or be relative, never to `grafana/grafanacon2026-opentelemetry-instrumentation`.
 
 ## Validating changes
 
