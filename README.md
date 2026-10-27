@@ -32,8 +32,8 @@ Workshop slides: [Getting started with OpenTelemetry instrumentation — Grafana
 Pull all Docker images at home before the session to avoid slow startup on conference WiFi:
 
 ```bash
-git clone https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation
-cd grafanacon2026-opentelemetry-instrumentation
+git clone https://github.com/immavalls/opentelemetry-instrumentation-workshop
+cd opentelemetry-instrumentation-workshop
 docker compose pull
 docker compose up --build
 ```

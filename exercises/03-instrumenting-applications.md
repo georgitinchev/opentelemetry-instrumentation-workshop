@@ -26,23 +26,23 @@ In this exercise you add OpenTelemetry SDK instrumentation to both the Go backen
 
 ## What you will change
 
-| File                                                                                                                                                                                                                | Changes                                                         |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| [frontend/package.json](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/frontend/package.json)                                                           | Add OTel packages                                               |
-| [frontend/server.js](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/frontend/server.js)                                                                 | Add OTel log transport to Winston _(optional)_                  |
-| [frontend/Dockerfile](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/frontend/Dockerfile)                                                               | Load auto-instrumentation via `--require`                       |
-| [backend/otel-config.yaml](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/backend/otel-config.yaml)                                                     | New file — declarative OTel SDK configuration                   |
-| [backend/telemetry.go](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/backend/telemetry.go)                                                             | New file — loads `otel-config.yaml` and wires up SDK globals    |
-| [backend/main.go](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/backend/main.go)                                                                       | Call `setupTelemetry`; add HTTP middleware                      |
-| [docker-compose.yaml](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/docker-compose.yaml)                                                               | Set `OTEL_*` env vars for both services                         |
-| [grafana/dashboards/apm-dashboard.json](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/grafana/dashboards/apm-dashboard.json)                           | Pre-provisioned APM dashboard — traces, metrics, and logs       |
-| [grafana/provisioning/alerting/frontend-alerts.yaml](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/grafana/provisioning/alerting/frontend-alerts.yaml) | Pre-provisioned alert rules for frontend error rate and latency |
+| File                                                                                                                                                                                                            | Changes                                                         |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| [frontend/package.json](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/frontend/package.json)                                                           | Add OTel packages                                               |
+| [frontend/server.js](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/frontend/server.js)                                                                 | Add OTel log transport to Winston _(optional)_                  |
+| [frontend/Dockerfile](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/frontend/Dockerfile)                                                               | Load auto-instrumentation via `--require`                       |
+| [backend/otel-config.yaml](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/backend/otel-config.yaml)                                                     | New file — declarative OTel SDK configuration                   |
+| [backend/telemetry.go](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/backend/telemetry.go)                                                             | New file — loads `otel-config.yaml` and wires up SDK globals    |
+| [backend/main.go](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/backend/main.go)                                                                       | Call `setupTelemetry`; add HTTP middleware                      |
+| [docker-compose.yaml](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/docker-compose.yaml)                                                               | Set `OTEL_*` env vars for both services                         |
+| [grafana/dashboards/apm-dashboard.json](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/grafana/dashboards/apm-dashboard.json)                           | Pre-provisioned APM dashboard — traces, metrics, and logs       |
+| [grafana/provisioning/alerting/frontend-alerts.yaml](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/grafana/provisioning/alerting/frontend-alerts.yaml) | Pre-provisioned alert rules for frontend error rate and latency |
 
 ---
 
 ## Part 1 — Frontend (Node.js)
 
-### Step 1 — Add dependencies to [frontend/package.json](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/frontend/package.json)
+### Step 1 — Add dependencies to [frontend/package.json](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/frontend/package.json)
 
 ```bash
 cd frontend
@@ -64,7 +64,7 @@ That writes the three packages into `frontend/package.json` and `frontend/packag
 - `auto-instrumentations-node` automatically instruments HTTP, DNS, and other Node.js built-ins.
 - `winston-transport` forwards Winston log records as OTel log records.
 
-### Step 2 — Add the OTel log transport in [frontend/server.js](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/frontend/server.js) _(optional)_
+### Step 2 — Add the OTel log transport in [frontend/server.js](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/frontend/server.js) _(optional)_
 
 > [!NOTE]
 > This step is optional. If you skip it, Winston logs will still appear in Loki as unstructured text, but they won't be correlated with traces via the OTel SDK.
@@ -84,7 +84,7 @@ That writes the three packages into `frontend/package.json` and `frontend/packag
  });
 ```
 
-### Step 3 — Load auto-instrumentation in [frontend/Dockerfile](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/frontend/Dockerfile)
+### Step 3 — Load auto-instrumentation in [frontend/Dockerfile](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/frontend/Dockerfile)
 
 ```diff
 # frontend/Dockerfile
@@ -94,7 +94,7 @@ That writes the three packages into `frontend/package.json` and `frontend/packag
 
 `--require` executes the module before any other code loads. This is how it can monkey-patch built-in modules like `http` — the patches are in place before the app imports anything.
 
-### Step 4 — Set env vars in [docker-compose.yaml](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/docker-compose.yaml)
+### Step 4 — Set env vars in [docker-compose.yaml](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/docker-compose.yaml)
 
 ```diff
 # docker-compose.yaml
@@ -125,7 +125,7 @@ cd ..
 > [!TIP]
 > Manual SDK onboarding — constructing providers, exporters, and processors in code — is an alternative to declarative config. It gives more control but requires more boilerplate. See [Add OpenTelemetry Instrumentation](https://opentelemetry.io/docs/languages/go/getting-started/#add-opentelemetry-instrumentation) in the Go getting-started guide.
 
-### Step 6 — Create [backend/otel-config.yaml](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/backend/otel-config.yaml)
+### Step 6 — Create [backend/otel-config.yaml](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/backend/otel-config.yaml)
 
 This file declares the full SDK configuration — exporters, readers, propagators, and resource attributes. It is embedded into the binary at compile time (see Step 7).
 
@@ -168,7 +168,7 @@ propagator:
 
 `${VAR:-default}` substitution is supported throughout the config file — `OTEL_SERVICE_NAME` and `OTEL_EXPORTER_OTLP_ENDPOINT` are read from the environment, with fallbacks if not set.
 
-### Step 7 — Create [backend/telemetry.go](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/backend/telemetry.go)
+### Step 7 — Create [backend/telemetry.go](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/backend/telemetry.go)
 
 Embed the config file and call `otelconf.NewSDK` to build all providers in one call:
 
@@ -214,7 +214,7 @@ func setupTelemetry(_ context.Context) (func(context.Context) error, error) {
 
 `//go:embed` bakes the YAML into the binary at compile time — no file path to manage at runtime.
 
-### Step 8 — Update [backend/main.go](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/backend/main.go)
+### Step 8 — Update [backend/main.go](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/backend/main.go)
 
 Call `setupTelemetry` at startup and add the gorilla/mux HTTP middleware to create a span for every inbound request:
 
@@ -252,7 +252,7 @@ Call `setupTelemetry` at startup and add the gorilla/mux HTTP middleware to crea
 +	r.Use(otelmux.Middleware("backend"))
 ```
 
-### Step 9 — Set env vars in [docker-compose.yaml](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/03-instrumenting-applications/docker-compose.yaml)
+### Step 9 — Set env vars in [docker-compose.yaml](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/03-instrumenting-applications/docker-compose.yaml)
 
 ```diff
 # docker-compose.yaml
