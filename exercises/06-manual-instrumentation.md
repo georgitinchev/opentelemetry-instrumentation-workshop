@@ -10,7 +10,7 @@ and is meant to be read and **explored**, not typed out. The doc walks through t
 design decisions; the full diff lives on GitHub.
 
 > [!TIP]
-> Open the [full diff for this exercise](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/compare/05-processing...06-manual-instrumentation)
+> Open the [full diff for this exercise](https://github.com/immavalls/opentelemetry-instrumentation-workshop/compare/05-processing...06-manual-instrumentation)
 > in a second tab and read it alongside this walkthrough. To run the finished version
 > locally: `git checkout origin/06-manual-instrumentation`.
 
@@ -45,10 +45,10 @@ pure login logic.
 
 ## Part 1 — Backend DB (Go)
 
-[**→ Browse Part 1 on GitHub**](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/compare/05-processing...06-manual-instrumentation#files_bucket) — filter to `backend/`.
+[**→ Browse Part 1 on GitHub**](https://github.com/immavalls/opentelemetry-instrumentation-workshop/compare/05-processing...06-manual-instrumentation#files_bucket) — filter to `backend/`.
 
-A new [`backend/db/instrumented.go`](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/06-manual-instrumentation/backend/db/instrumented.go) wraps `*sql.DB` with OTel. `Connect()` in
-[`db.go`](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/06-manual-instrumentation/backend/db/db.go) now returns the wrapper, so every handler and middleware that took a
+A new [`backend/db/instrumented.go`](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/06-manual-instrumentation/backend/db/instrumented.go) wraps `*sql.DB` with OTel. `Connect()` in
+[`db.go`](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/06-manual-instrumentation/backend/db/db.go) now returns the wrapper, so every handler and middleware that took a
 `*sql.DB` needs to accept `*dbpkg.DB` instead (`go build ./...` lists them all).
 
 The key pieces to look for in `instrumented.go`:
@@ -70,7 +70,7 @@ The key pieces to look for in `instrumented.go`:
   `sync.Once` so it ends exactly once.
 
 - **Errors are emitted as logs, not span events.** `endSpan` calls `slog.ErrorContext`,
-  which (via the slog→OTel bridge in [`backend/telemetry.go`](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/06-manual-instrumentation/backend/telemetry.go))
+  which (via the slog→OTel bridge in [`backend/telemetry.go`](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/06-manual-instrumentation/backend/telemetry.go))
   emits a log correlated to the active span. This follows the [exceptions-as-logs spec](https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-logs/).
   `sql.ErrNoRows` is treated as a normal outcome and does not set error status.
 
@@ -82,10 +82,10 @@ The key pieces to look for in `instrumented.go`:
 
 ## Part 2 — Frontend Login (Node.js)
 
-[**→ Browse Part 2 on GitHub**](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/compare/05-processing...06-manual-instrumentation#files_bucket) — filter to `frontend/`.
+[**→ Browse Part 2 on GitHub**](https://github.com/immavalls/opentelemetry-instrumentation-workshop/compare/05-processing...06-manual-instrumentation#files_bucket) — filter to `frontend/`.
 
-A new [`frontend/otel-auth.js`](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/06-manual-instrumentation/frontend/otel-auth.js) exports `instrumentLogin(provider, fn)`.
-[`server.js`](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/06-manual-instrumentation/frontend/server.js) uses it to wrap the OAuth callback, and records the
+A new [`frontend/otel-auth.js`](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/06-manual-instrumentation/frontend/otel-auth.js) exports `instrumentLogin(provider, fn)`.
+[`server.js`](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/06-manual-instrumentation/frontend/server.js) uses it to wrap the OAuth callback, and records the
 `auth.client.login.duration` metric directly in the plain-username login handler.
 
 What to look for:
@@ -117,9 +117,9 @@ What to look for:
 Both parts use **in-memory exporters** for fast, hermetic unit tests — no real trace
 backend required.
 
-**Backend** — [tests/backend/instrumentation_test.go](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/06-manual-instrumentation/tests/backend/instrumentation_test.go) uses an in-memory span recorder against a real (ephemeral) database.
+**Backend** — [tests/backend/instrumentation_test.go](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/06-manual-instrumentation/tests/backend/instrumentation_test.go) uses an in-memory span recorder against a real (ephemeral) database.
 
-**Frontend** — [tests/frontend/otel-auth.test.js](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/06-manual-instrumentation/tests/frontend/otel-auth.test.js) uses in-memory span and metric exporters.
+**Frontend** — [tests/frontend/otel-auth.test.js](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/06-manual-instrumentation/tests/frontend/otel-auth.test.js) uses in-memory span and metric exporters.
 
 ```bash
 make test
