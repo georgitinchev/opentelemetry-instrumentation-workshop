@@ -20,11 +20,11 @@ Suppress noisy auto-instrumentation modules, enrich spans with application conte
 
 ## What you will change
 
-| File                                                                                                                                                    | Changes                                                              |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| [docker-compose.yaml](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/04-customizing-instrumentations/docker-compose.yaml) | Disable `net` auto-instrumentation and enable 50% head-based sampler |
-| [frontend/server.js](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/04-customizing-instrumentations/frontend/server.js)   | Set `enduser.id` and `enduser.pseudo.id` on every authenticated span |
-| [backend/main.go](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/04-customizing-instrumentations/backend/main.go)         | Add `WithFilter` to the `otelmux` middleware to skip `/api/health`   |
+| File                                                                                                                                                | Changes                                                              |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [docker-compose.yaml](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/04-customizing-instrumentations/docker-compose.yaml) | Disable `net` auto-instrumentation and enable 50% head-based sampler |
+| [frontend/server.js](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/04-customizing-instrumentations/frontend/server.js)   | Set `enduser.id` and `enduser.pseudo.id` on every authenticated span |
+| [backend/main.go](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/04-customizing-instrumentations/backend/main.go)         | Add `WithFilter` to the `otelmux` middleware to skip `/api/health`   |
 
 ---
 
@@ -34,7 +34,7 @@ The `net` module instrumentation produces low-level TCP spans that are rarely us
 
 ### Step 1 — Disable the `net` instrumentation
 
-In [docker-compose.yaml](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/04-customizing-instrumentations/docker-compose.yaml):
+In [docker-compose.yaml](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/04-customizing-instrumentations/docker-compose.yaml):
 
 ```diff
 # docker-compose.yaml
@@ -55,7 +55,7 @@ Auto-instrumentation knows nothing about session state. Setting attributes on th
 
 ### Step 2 — Set `enduser.id` on incoming spans
 
-In [frontend/server.js](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/04-customizing-instrumentations/frontend/server.js), add the import and extend the existing auth middleware:
+In [frontend/server.js](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/04-customizing-instrumentations/frontend/server.js), add the import and extend the existing auth middleware:
 
 ```diff
 // frontend/server.js
@@ -97,7 +97,7 @@ Filters and disabled modules target specific known-noisy spans. Sampling is the 
 
 ### Step 3 — Sample 50% of frontend traces
 
-In [docker-compose.yaml](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/04-customizing-instrumentations/docker-compose.yaml):
+In [docker-compose.yaml](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/04-customizing-instrumentations/docker-compose.yaml):
 
 ```diff
 # docker-compose.yaml
@@ -116,7 +116,7 @@ In [docker-compose.yaml](https://github.com/grafana/grafanacon2026-opentelemetry
 Backend spans inherit the frontend's decision through the `traceparent` header. Spans the backend starts itself (its own health loop, background jobs) are governed by the backend's own sampler — unchanged here.
 
 > [!WARNING]
-> Head-based sampling is probabilistic and applied at the start of the trace — you can't change your mind later if the operation turns out to have an error or high latency. [Exercise 05 — Part 3](05-processing.md#part-3--sample-smartly-in-the-collector) swaps this head sampler for tail-based sampling in the collector, where the decision can be made after the trace is complete.
+> Head-based sampling is probabilistic and applied at the start of the trace — you can't change your mind later if the operation turns out to have an error or high latency. [Exercise 05 — Part 3](05-processing.md#part-3--tail-based-sampling-in-the-collector) swaps this head sampler for tail-based sampling in the collector, where the decision can be made after the trace is complete.
 
 ---
 
@@ -133,7 +133,7 @@ For the **Node.js frontend**, which uses zero-code auto-instrumentation, there i
 
 ### Step 4 — Filter health-check requests in the middleware
 
-In [backend/main.go](https://github.com/grafana/grafanacon2026-opentelemetry-instrumentation/blob/04-customizing-instrumentations/backend/main.go), add a filter to the existing middleware line:
+In [backend/main.go](https://github.com/immavalls/opentelemetry-instrumentation-workshop/blob/04-customizing-instrumentations/backend/main.go), add a filter to the existing middleware line:
 
 ```diff
 // backend/main.go
