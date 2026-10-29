@@ -92,6 +92,19 @@ services:
       frontend:
         condition: service_healthy
 
+  obi:
+    container_name: obi
+    image: otel/ebpf-instrument:v0.6.0
+    privileged: true
+    pid: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./obi/obi-config.yaml:/etc/obi/config.yaml:ro
+    environment:
+      OTEL_EBPF_CONFIG_PATH: /etc/obi/config.yaml
+    depends_on:
+      - otel-collector
+
 volumes:
   db_data:
   lgtm_data:
